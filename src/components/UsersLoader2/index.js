@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { getUsers } from './../../api';
+import UserDetails from '../UserDetais/';
 import { NATIONLITIES } from '../../config/nationalities'; 
+
 
 class UsersLoader2 extends Component {
   constructor(props) {
@@ -45,8 +47,7 @@ class UsersLoader2 extends Component {
   }
   componentDidUpdate(prevProps, prevState) {
     console.log('componentDidUpdate');
-    const isDataPrev =((prevState.page === this.state.page) && (prevState.nat === this.state.nat)) ;
-    console.log(isDataPrev);
+    const isDataPrev =((prevState.page === this.state.page) && (prevState.nat === this.state.nat));
     if ( isDataPrev ) {
       return;
     }
@@ -63,7 +64,8 @@ class UsersLoader2 extends Component {
     const { page, disabled } = this.state;
     if (page !== 1) {
       this.setState({
-        page: this.state.page - 1
+        page: this.state.page - 1,
+        selectedUsers: []
       })
     } else {
       this.setState({
@@ -75,30 +77,44 @@ class UsersLoader2 extends Component {
   nextPage = () => {
     this.setState({
       page: this.state.page + 1,
-      disabled: false
+      disabled: false,
+      selectedUsers: []
     })
   }
 
   handlerClik = (user) => {
     const newSelectedUsers = [...this.state.selectedUsers];
     newSelectedUsers.push(user);
-    console.log(newSelectedUsers)
-  //   this.setState({
-  //   selectedUsers: newSelectedUsers
-  //  })
+    this.setState({
+    selectedUsers: newSelectedUsers
+   })
+  }
+
+  hideDetails = (id) => {
+    debugger;
+    const { selectedUsers } = this.state;
+    console.log(selectedUsers);
+    const newSelectedUsers = selectedUsers.filter((user) => user.login.uuid !== id);
+    console.log(newSelectedUsers);
+    this.setState({
+      selectedUsers: newSelectedUsers
+     })
   }
 
   showUser = (user) => {
     const userToRender = user;
-    console.log(userToRender);
-    // const { selectedUsers } = this.state;
-    // console.log(selectedUsers);
-    // const showdetails = this.state.selectedUsers.includes(user) ? true : false;
-    const showdetails = false;
+    const { selectedUsers } = this.state;
+    console.log(selectedUsers);
+    const showdetails = this.state.selectedUsers.includes(userToRender) ? true : false;
     return <li key={user.login.uuid}>
       {`${user.name.first} ${user.name.last}`} 
-      <button onClick={ this.handlerClik(userToRender) }>Details</button>
-      {showdetails && 'some info'}
+      <button onClick={ () => this.handlerClik(userToRender) }>Details</button>
+      {showdetails && 
+      <UserDetails img={userToRender.picture.large}
+                   phone={userToRender.cell}
+                   id={userToRender.login.uuid}
+                   hideDetails={this.hideDetails}
+      />}
     </li>
     }
   
